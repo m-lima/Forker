@@ -3,6 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#define VERBOSE
+
 struct Command {
   int index;
   pid_t pid;
@@ -103,8 +105,9 @@ int main(int argc, char * argv[]) {
 #ifdef VERBOSE
       printf("[%s] Starting\n", argv[commands[i].index]);
 #endif
+      execv(argv[commands[i].index], argv + commands[i].index);
       free(commands);
-      execv(argv[commands[i].index], argv + commands[i].index + 1);
+      exit(EXIT_SUCCESS);
     } else {
       printf("[%s] Started with PID %ld\n", argv[commands[i].index], (long) pid);
       commands[i].pid = pid;
@@ -112,11 +115,11 @@ int main(int argc, char * argv[]) {
   }
 
   for (int i = 0; i < cmdCount; ++i) {
-    int status = 0;
-
 #ifdef VERBOSE
     printf("[%s] Waiting for PID %ld\n", argv[commands[i].index], (long) commands[i].pid);
 #endif
+
+    int status = 0;
     waitpid(commands[i].pid, &status, 0);
     printf("[%s] Exited with status %d\n", argv[commands[i].index], status);
   }
